@@ -1,0 +1,12 @@
+= Zetta, Ruby bindings for ZFS
+
+Zetta is a C library interface to ZFS, Sun's shiny new Zettabyte File System,
+which made its debut in OpenSolaris. Apparently now, ports are abound to the
+stable Solaris 10 release, FreeBSD and the upcoming Mac OS X release. So some
+Ruby rock star will have to write an interface to use it or the Ruby hordes
+will be left behind!  And we can't have that!
+
+*Please read my mind to discover how this library works until I deign to write
+some better documentation.*
+
+*Note:* I may have used _why and beer as inspiration whilst writing some of this documentation.
