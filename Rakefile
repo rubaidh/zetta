@@ -10,6 +10,9 @@ task :default => [ :compile, :test ]
 
 MAJOR_VERSION = "0.1"
 
+BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp}"
+CLEAN.include ["ext/**/#{BIN}", "lib/#{BIN}", "ext/**/{Makefile,mkmf.log}", "*.gem"]
+Gem::manage_gems
 SPEC = Gem::Specification.new do |s|
   # Stuff I might want to tweak.
   s.summary = "A Ruby interface to manage ZFS."
@@ -20,7 +23,7 @@ SPEC = Gem::Specification.new do |s|
   s.version = MAJOR_VERSION + (revision ? ".#{revision}" : "")
 
   # Usual constants
-  s.name = File.split(File.dirname(File.expand_path(__FILE__)))[-1]
+  s.name = File.basename(File.dirname(File.expand_path(__FILE__)))
   s.author = "Graeme Mathieson"
   s.email = "mathie@rubaidh.com"
   s.homepage = "http://www.rubaidh.com/projects/#{s.name}"
@@ -55,4 +58,42 @@ end
 Rake::GemPackageTask.new(SPEC) do |p|
   p.need_tar_bz2  = true
   p.need_zip      = true
+end
+
+extensions = Dir.glob('ext/*').map { |f| File.basename(f).to_sym }
+
+desc "Compile the Ruby extensions"
+task :compile => extensions do
+  if Dir.glob(extensions.map { |ext| File.join('lib', "#{ext}.*") }).length != extensions.length
+    STDERR.puts "One or more of the extensions failed to build.  But I didn't tell you sooner!"
+    exit(1)
+  end
+end
+
+extensions.each do |extension|
+  ext = "ext/#{extension}"
+  ext_so = "#{ext}/#{extension}.#{Config::CONFIG['DLEXT']}"
+  ext_files = FileList[
+    "#{ext}/*.c",
+    "#{ext}/*.h",
+    "#{ext}/extconf.rb",
+    "#{ext}/Makefile",
+    "lib"
+  ]
+
+  desc "Builds just the #{extension} extension."
+  task extension => [ "#{ext}/Makefile", ext_so ]
+
+  file "#{ext}/Makefile" => [ "#{ext}/extconf.rb" ] do
+    Dir.chdir(ext) do
+      ruby "extconf.rb"
+    end
+  end
+  
+  file ext_so => ext_files do
+    Dir.chdir(ext) do
+      sh 'make'
+    end
+    cp ext_so, "lib"
+  end
 end
