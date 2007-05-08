@@ -10,8 +10,8 @@ task :default => [ :compile, :test ]
 
 MAJOR_VERSION = "0.1"
 
-BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp}"
-CLEAN.include ["ext/**/#{BIN}", "lib/#{BIN}", "ext/**/{Makefile,mkmf.log}", "*.gem"]
+CLEAN.include ["ext/**/*.bundle", "lib/*.bundle", "ext/**/{Makefile,mkmf.log,*.o}", "*.gem", 'pkg']
+
 Gem::manage_gems
 SPEC = Gem::Specification.new do |s|
   # Stuff I might want to tweak.
@@ -26,12 +26,14 @@ SPEC = Gem::Specification.new do |s|
   s.name = File.basename(File.dirname(File.expand_path(__FILE__)))
   s.author = "Graeme Mathieson"
   s.email = "mathie@rubaidh.com"
-  s.homepage = "http://www.rubaidh.com/projects/#{s.name}"
+  s.homepage = "http://rubaidh.lighthouseapp.com/projects/2308/home"
   s.platform = Gem::Platform::RUBY # FIXME: Maybe this should be Solaris?
   s.description = s.summary
-  s.files = %w(CHANGELOG Rakefile README) +
-    FileList["{bin,doc,lib,test}/**/*"].exclude("rdoc").to_a +
-    FileList["ext/**/*.{h,c}"].to_a
+  s.files = (%w(CHANGELOG Rakefile README) +
+      FileList["{bin,doc,lib,test}/**/*"].exclude("rdoc").to_a +
+      FileList["ext/**/*.{h,c}"].to_a).delete_if do |f|
+    f =~ /^\._/ || f == 'rdoc'
+  end
   s.require_path = "lib"
   s.extensions = FileList["ext/**/extconf.rb"].to_a
   s.bindir = 'bin'
@@ -50,7 +52,7 @@ end
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'doc/rdoc'
-  rdoc.options += ['--line-numbers', '--inline-sources']
+  rdoc.options += ['--line-numbers', '--inline-source']
   rdoc.main = 'README'
   rdoc.rdoc_files.add [SPEC.extra_rdoc_files, 'lib/**/*.rb'].flatten
 end
