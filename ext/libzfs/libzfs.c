@@ -60,8 +60,15 @@ static VALUE my_zpool_get_space_total(VALUE self)
 
 static VALUE my_zpool_get_root(VALUE self)
 {
-  // TODO: Implement
-  return Qnil;
+  zpool_handle_t *zpool_handle;
+  char root[MAXPATHLEN];
+  Data_Get_Struct(self, zpool_handle_t, zpool_handle);
+
+  if(zpool_get_root(zpool_handle, root, sizeof(root)) < 0) {
+    return Qnil;
+  } else {
+    return rb_str_new2(root);
+  }
 }
 
 static VALUE my_zpool_get_state(VALUE self)
@@ -79,6 +86,15 @@ static VALUE my_zpool_get_version(VALUE self)
   
   return ULL2NUM(zpool_get_version(zpool_handle));
 }
+
+// static VALUE my_zpool_create(VALUE libzfs_handle, VALUE name, VALUE vdevs, VALUE altroot)
+// {
+//   libzfs_handle_t *libhandle;
+//   nvlist_t *vdevs = NULL;
+//   Data_Get_Struct(libzfs_handle, libzfs_handle_t, libhandle);
+//   
+//   return INT2NUM(zpool_create(libzfs_handle, StringValuePtr(name), vdev_list, StringValuePtr(altroot)));
+// }
 
 /*
  * The low-level libzfs handle widget.
