@@ -58,6 +58,28 @@ static VALUE my_zpool_get_space_total(VALUE self)
   return ULL2NUM(zpool_get_space_total(zpool_handle));
 }
 
+static VALUE my_zpool_get_root(VALUE self)
+{
+  // TODO: Implement
+  return Qnil;
+}
+
+static VALUE my_zpool_get_state(VALUE self)
+{
+  zpool_handle_t *zpool_handle;
+  Data_Get_Struct(self, zpool_handle_t, zpool_handle);
+
+  return INT2NUM(zpool_get_state(zpool_handle));
+}
+
+static VALUE my_zpool_get_version(VALUE self)
+{
+  zpool_handle_t *zpool_handle;
+  Data_Get_Struct(self, zpool_handle_t, zpool_handle);
+  
+  return ULL2NUM(zpool_get_version(zpool_handle));
+}
+
 /*
  * The low-level libzfs handle widget.
  */
@@ -115,4 +137,7 @@ void Init_libzfs()
   rb_define_method(cZpool, "guid", my_zpool_get_guid, 0);
   rb_define_method(cZpool, "space_used", my_zpool_get_space_used, 0);
   rb_define_method(cZpool, "space_total", my_zpool_get_space_total, 0);
+  rb_define_method(cZpool, "root", my_zpool_get_root, 0);
+  rb_define_method(cZpool, "state", my_zpool_get_state, 0);
+  rb_define_method(cZpool, "version", my_zpool_get_version, 0);
 }
