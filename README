@@ -10,3 +10,10 @@ will be left behind!  And we can't have that!
 some better documentation.*
 
 *Note:* I may have used _why and beer as inspiration whilst writing some of this documentation.
+
+= TODO List
+
+* Implement nvlists as a C extension so that I get to screw with them in Ruby
+  instead of trying to figure out how to do it all in C.
+
+* The vdev manipulation stuff needs for nvlists to work.

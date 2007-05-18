@@ -66,7 +66,7 @@ extensions = Dir.glob('ext/*').map { |f| File.basename(f).to_sym }
 
 desc "Compile the Ruby extensions"
 task :compile => extensions do
-  if Dir.glob(*extensions.map { |ext| File.join('lib', "#{ext}.*") }).length != extensions.length
+  if Dir.glob("lib/{#{extensions.map.join(',')}}.*").length != extensions.length
     STDERR.puts "One or more of the extensions failed to build.  But I didn't tell you sooner!"
     exit(1)
   end
