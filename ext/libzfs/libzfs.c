@@ -11,19 +11,42 @@
 // FIXME: I'm still not sure this is the right way to do it!
 static VALUE my_zpool_new(int argc, VALUE *argv, VALUE klass)
 {
-  // FIXME: Make this robust!
-  VALUE pool_name = argv[0];
-  VALUE libzfs_handle = argv[1];
-  
+  VALUE pool_name, libzfs_handle;
   libzfs_handle_t *libhandle;
   zpool_handle_t  *zpool_handle;
 
+  if(argc != 2) {
+    rb_raise(rb_eArgError, "Two arguments are required -- the pool name and libzfs handle.");
+  }
+  pool_name = argv[0];
+  libzfs_handle = argv[1];
+  
   Data_Get_Struct(libzfs_handle, libzfs_handle_t, libhandle);
+
+  // FIXME: How do I switch from a symbol to a string automagically?
+  // if(SYMBOL_P(pool_name)) {
+  //   pool_name = rb_funcall(pool_name, 'to_s', 0);
+  // }
 
   // FIXME: Should be +_canfail+ or not?
   zpool_handle = zpool_open_canfail(libhandle, StringValuePtr(pool_name));
 
   return Data_Wrap_Struct(klass, 0, zpool_close, zpool_handle);
+}
+
+static VALUE my_zpool_get_handle(VALUE self)
+{
+  VALUE klass = rb_const_get(rb_cObject, rb_intern("LibZfs"));
+  libzfs_handle_t *handle;
+  zpool_handle_t *zpool_handle;
+  
+  Data_Get_Struct(self, zpool_handle_t, zpool_handle);
+
+  handle = zpool_get_handle(zpool_handle);
+
+  // Note that we don't need to free the handle here, because it's just a
+  // copy of one that's already in the garbage collector.
+  return Data_Wrap_Struct(klass, 0, 0, handle);
 }
 
 static VALUE my_zpool_get_name(VALUE self)
@@ -87,6 +110,22 @@ static VALUE my_zpool_get_version(VALUE self)
   return ULL2NUM(zpool_get_version(zpool_handle));
 }
 
+static int my_zpool_iter_f(zpool_handle_t *handle, void *klass)
+{
+  rb_yield(Data_Wrap_Struct((VALUE)klass, 0, zpool_close, handle));
+  return 0;
+}
+
+static VALUE my_zpool_iter(VALUE klass, VALUE libzfs_handle)
+{
+  libzfs_handle_t *libhandle;
+  Data_Get_Struct(libzfs_handle, libzfs_handle_t, libhandle);
+
+  zpool_iter(libhandle, my_zpool_iter_f, (void *)klass);
+  
+  return Qnil;
+}
+
 // static VALUE my_zpool_create(VALUE libzfs_handle, VALUE name, VALUE vdevs, VALUE altroot)
 // {
 //   libzfs_handle_t *libhandle;
@@ -95,6 +134,18 @@ static VALUE my_zpool_get_version(VALUE self)
 //   
 //   return INT2NUM(zpool_create(libzfs_handle, StringValuePtr(name), vdev_list, StringValuePtr(altroot)));
 // }
+
+
+/*
+ * ZFS interface
+ */
+
+// TODO
+// static VALUE my_zfs_get_handle(VALUE self)
+// {
+//   
+// }
+
 
 /*
  * The low-level libzfs handle widget.
@@ -117,7 +168,7 @@ static VALUE my_libzfs_print_on_error(VALUE self, VALUE b)
   libzfs_handle_t *handle;
   Data_Get_Struct(self, libzfs_handle_t, handle);
 
-  libzfs_print_on_error(handle, b == Qtrue);
+  libzfs_print_on_error(handle, RTEST(b));
   return Qnil;
 }
 
@@ -156,4 +207,7 @@ void Init_libzfs()
   rb_define_method(cZpool, "root", my_zpool_get_root, 0);
   rb_define_method(cZpool, "state", my_zpool_get_state, 0);
   rb_define_method(cZpool, "version", my_zpool_get_version, 0);
+  rb_define_method(cZpool, "libzfs_handle", my_zpool_get_handle, 0);
+  
+  rb_define_singleton_method(cZpool, "each", my_zpool_iter, 1);
 }
