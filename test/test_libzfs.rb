@@ -78,6 +78,7 @@ context "Given a precreated pool on the filesystem called 'pool'" do
     # h.should.be @z
   end
   
+  # FIXME: Right now we can't use symbols for pool names yet.
   # specify "We can pass in something other than a string to the pool open" do
   #   pool = Zpool.new(:pool, @z)
   #   pool.should.not.be nil
@@ -86,4 +87,32 @@ context "Given a precreated pool on the filesystem called 'pool'" do
   #   @z.error_description.should.equal "no error"
   # end
   
+end
+
+context "Given a ZFS filesystem called 'pool/mathie'" do
+  setup do
+    @z = LibZfs.new
+  end
+
+  specify "we can open up the filesystem" do
+    fs = ZFS.new('pool/mathie', @z, 15)
+    fs.should.not.be nil
+    @z.errno.should.be 0
+    @z.error_action.should.equal ""
+    @z.error_description.should.equal "no error"
+  end
+end
+
+context "Given a non-existant filesystem 'pool/nonexistent'" do
+  setup do
+    @z = LibZfs.new
+  end
+  
+  specify "Until I fix it, we can create the object, but @z notes the error." do
+    fs = ZFS.new('pool/nonexistent', @z, 15)
+    fs.should.not.be nil
+    @z.errno.should.be 2009 # FIXME: Magic numbers!
+    @z.error_action.should.equal "cannot open 'pool/nonexistent'"
+    @z.error_description.should.equal "dataset does not exist"
+  end
 end

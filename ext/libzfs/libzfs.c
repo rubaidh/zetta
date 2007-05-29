@@ -135,17 +135,53 @@ static VALUE my_zpool_iter(VALUE klass, VALUE libzfs_handle)
 //   return INT2NUM(zpool_create(libzfs_handle, StringValuePtr(name), vdev_list, StringValuePtr(altroot)));
 // }
 
+// FIXME: Doesn't appear to work?  Maybe I actually need to offline it before
+// I can destroy?  If so, that's something for the higher level Ruby library.
+static VALUE my_zpool_destroy(VALUE self)
+{
+  zpool_handle_t *zpool_handle;
+  Data_Get_Struct(self, zpool_handle_t, zpool_handle);
+  
+  return INT2NUM(zpool_destroy(zpool_handle));
+}
 
 /*
  * ZFS interface
  */
 
 // TODO
-// static VALUE my_zfs_get_handle(VALUE self)
-// {
-//   
-// }
+static VALUE my_zfs_get_handle(VALUE self)
+{
+  VALUE klass = rb_const_get(rb_cObject, rb_intern("LibZfs"));
+  libzfs_handle_t *handle;
+  zfs_handle_t *zfs_handle;
+  
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
 
+  handle = zfs_get_handle(zfs_handle);
+
+  // Note that we don't need to free the handle here, because it's just a
+  // copy of one that's already in the garbage collector.
+  return Data_Wrap_Struct(klass, 0, 0, handle);
+}
+
+static VALUE my_zfs_new(int argc, VALUE *argv, VALUE klass)
+{
+  VALUE fs_name, libzfs_handle, types;
+  libzfs_handle_t *libhandle;
+  zfs_handle_t  *zfs_handle;
+
+  if(argc != 3) {
+    rb_raise(rb_eArgError, "Two arguments are required -- the file system name, libzfs handle and a mask of types.");
+  }
+  fs_name = argv[0];
+  libzfs_handle = argv[1];
+  types = argv[2];
+
+  Data_Get_Struct(libzfs_handle, libzfs_handle_t, libhandle);
+  zfs_handle = zfs_open(libhandle, StringValuePtr(fs_name), NUM2INT(types));
+  return Data_Wrap_Struct(klass, 0, zfs_close, zfs_handle);
+}
 
 /*
  * The low-level libzfs handle widget.
@@ -192,6 +228,7 @@ void Init_libzfs()
 {
   VALUE cLibZfs = rb_define_class("LibZfs", rb_cObject);
   VALUE cZpool = rb_define_class("Zpool", rb_cObject);
+  VALUE cZFS = rb_define_class("ZFS", rb_cObject);
 
   rb_define_alloc_func(cLibZfs, my_libzfs_alloc);
   rb_define_method(cLibZfs, "errno", my_libzfs_errno, 0);
@@ -208,6 +245,11 @@ void Init_libzfs()
   rb_define_method(cZpool, "state", my_zpool_get_state, 0);
   rb_define_method(cZpool, "version", my_zpool_get_version, 0);
   rb_define_method(cZpool, "libzfs_handle", my_zpool_get_handle, 0);
+  rb_define_method(cZpool, "destroy!", my_zpool_destroy, 0);
   
   rb_define_singleton_method(cZpool, "each", my_zpool_iter, 1);
+  
+  rb_define_singleton_method(cZFS, "new", my_zfs_new, -1);
+  rb_define_method(cZFS, "libzfs_handle", my_zfs_get_handle, 0);
+  
 }
