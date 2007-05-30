@@ -5,8 +5,10 @@ require 'rake/gempackagetask'
 require 'rake/testtask'
 require 'rake/rdoctask'
 
+require 'spec/rake/spectask'
+
 desc "Compiles and tests the build"
-task :default => [ :compile, :test ]
+task :default => [ :compile, :spec ]
 
 MAJOR_VERSION = "0.1"
 
@@ -48,6 +50,12 @@ Rake::TestTask.new do |t|
   t.libs << 'test'
   t.test_files = SPEC.test_files
   t.verbose = true
+end
+
+Spec::Rake::SpecTask.new do |spec|
+  spec.spec_files = FileList['spec/**/*_spec.rb']
+  spec.rcov = true
+  spec.rcov_dir = "doc/coverage"
 end
 
 Rake::RDocTask.new do |rdoc|
