@@ -2,7 +2,6 @@ require 'rubygems'
 require 'rake'
 require 'rake/clean'
 require 'rake/gempackagetask'
-require 'rake/testtask'
 require 'rake/rdoctask'
 
 require 'spec/rake/spectask'
@@ -32,24 +31,20 @@ SPEC = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY # FIXME: Maybe this should be Solaris?
   s.description = s.summary
   s.files = (%w(CHANGELOG Rakefile README) +
-      FileList["{bin,doc,lib,test}/**/*"].exclude("rdoc").to_a +
+      FileList["{bin,doc,lib,spec}/**/*"].to_a +
       FileList["ext/**/*.{h,c}"].to_a).delete_if do |f|
-    f =~ /^\._/ || f == 'rdoc'
+    f =~ /^\._/ ||
+    f =~ /doc\/(rdoc|coverage)/ ||
+    f =~ /\.(so|bundle)$/
   end
   s.require_path = "lib"
   s.extensions = FileList["ext/**/extconf.rb"].to_a
   s.bindir = 'bin'
-  s.test_files = FileList["test/test_*.rb"].to_a
+  s.test_files = FileList["spec/*.rb"].to_a
 
   # Documentation
   s.has_rdoc = true
   s.extra_rdoc_files = ['README', 'CHANGELOG']
-end
-
-Rake::TestTask.new do |t|
-  t.libs << 'test'
-  t.test_files = SPEC.test_files
-  t.verbose = true
 end
 
 Spec::Rake::SpecTask.new do |spec|
@@ -66,8 +61,6 @@ Rake::RDocTask.new do |rdoc|
 end
 
 Rake::GemPackageTask.new(SPEC) do |p|
-  p.need_tar_bz2  = true
-  p.need_zip      = true
 end
 
 extensions = Dir.glob('ext/*').map { |f| File.basename(f).to_sym }
