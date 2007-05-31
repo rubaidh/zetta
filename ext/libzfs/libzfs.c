@@ -224,12 +224,24 @@ static VALUE my_libzfs_error_description(VALUE self)
   return rb_str_new2(libzfs_error_description(handle));
 }
 
+static void Init_libzfs_consts(VALUE mod)
+{
+  rb_define_const(mod, "TYPE_FILESYSTEM", INT2NUM(ZFS_TYPE_FILESYSTEM));
+  rb_define_const(mod, "TYPE_SNAPSHOT", INT2NUM(ZFS_TYPE_SNAPSHOT));
+  rb_define_const(mod, "TYPE_VOLUME", INT2NUM(ZFS_TYPE_VOLUME));
+  rb_define_const(mod, "TYPE_POOL", INT2NUM(ZFS_TYPE_POOL));
+  rb_define_const(mod, "TYPE_ANY", INT2NUM(ZFS_TYPE_ANY));
+}
+
 void Init_libzfs()
 {
   VALUE cLibZfs = rb_define_class("LibZfs", rb_cObject);
   VALUE cZpool = rb_define_class("Zpool", rb_cObject);
   VALUE cZFS = rb_define_class("ZFS", rb_cObject);
+  VALUE cZfsConsts = rb_define_module("ZfsConsts");
 
+  Init_libzfs_consts(cZfsConsts);
+  
   rb_define_alloc_func(cLibZfs, my_libzfs_alloc);
   rb_define_method(cLibZfs, "errno", my_libzfs_errno, 0);
   rb_define_method(cLibZfs, "print_on_error", my_libzfs_print_on_error, 1);

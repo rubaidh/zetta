@@ -93,13 +93,23 @@ describe Zpool, "given a precreated pool on the filesystem called 'pool'" do
   # end
 end
 
+describe "All the constants in libzfs.h" do
+  it "should make the filesystem types available" do
+    ZfsConsts::TYPE_FILESYSTEM.should == 1
+    ZfsConsts::TYPE_SNAPSHOT.should   == 2
+    ZfsConsts::TYPE_VOLUME.should     == 4
+    ZfsConsts::TYPE_POOL.should       == 8
+    ZfsConsts::TYPE_ANY.should == ZfsConsts::TYPE_FILESYSTEM | ZfsConsts::TYPE_SNAPSHOT | ZfsConsts::TYPE_VOLUME
+  end
+end
+
 describe "Given a ZFS filesystem called 'pool/mathie'" do
   before do
     @z = LibZfs.new
   end
 
   it "we can open up the filesystem" do
-    fs = ZFS.new('pool/mathie', @z, 15)
+    fs = ZFS.new('pool/mathie', @z, ZfsConsts::TYPE_ANY)
     fs.should_not be_nil
     @z.errno.should == 0
     @z.error_action.should == ""
@@ -113,7 +123,7 @@ context "Given a non-existant filesystem 'pool/nonexistent'" do
   end
   
   it "Until I fix it, we can create the object, but @z notes the error." do
-    fs = ZFS.new('pool/nonexistent', @z, 15)
+    fs = ZFS.new('pool/nonexistent', @z, ZfsConsts::TYPE_ANY)
     fs.should_not be_nil
     @z.errno.should == 2009 # FIXME: Magic numbers!
     @z.error_action.should == "cannot open 'pool/nonexistent'"
