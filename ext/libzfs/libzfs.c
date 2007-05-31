@@ -84,7 +84,7 @@ static VALUE my_zpool_get_space_total(VALUE self)
 static VALUE my_zpool_get_root(VALUE self)
 {
   zpool_handle_t *zpool_handle;
-  char root[MAXPATHLEN];
+  char root[ZPOOL_MAXNAMELEN];
   Data_Get_Struct(self, zpool_handle_t, zpool_handle);
 
   if(zpool_get_root(zpool_handle, root, sizeof(root)) < 0) {
@@ -149,7 +149,6 @@ static VALUE my_zpool_destroy(VALUE self)
  * ZFS interface
  */
 
-// TODO
 static VALUE my_zfs_get_handle(VALUE self)
 {
   VALUE klass = rb_const_get(rb_cObject, rb_intern("LibZfs"));
@@ -224,13 +223,67 @@ static VALUE my_libzfs_error_description(VALUE self)
   return rb_str_new2(libzfs_error_description(handle));
 }
 
-static void Init_libzfs_consts(VALUE mod)
+static void Init_libzfs_consts()
 {
-  rb_define_const(mod, "TYPE_FILESYSTEM", INT2NUM(ZFS_TYPE_FILESYSTEM));
-  rb_define_const(mod, "TYPE_SNAPSHOT", INT2NUM(ZFS_TYPE_SNAPSHOT));
-  rb_define_const(mod, "TYPE_VOLUME", INT2NUM(ZFS_TYPE_VOLUME));
-  rb_define_const(mod, "TYPE_POOL", INT2NUM(ZFS_TYPE_POOL));
-  rb_define_const(mod, "TYPE_ANY", INT2NUM(ZFS_TYPE_ANY));
+  VALUE cZfsConsts = rb_define_module("ZfsConsts");
+  VALUE mErrors = rb_define_module_under(cZfsConsts, "Errors");
+
+  // Filesystem types
+  rb_define_const(cZfsConsts, "TYPE_FILESYSTEM", INT2NUM(ZFS_TYPE_FILESYSTEM));
+  rb_define_const(cZfsConsts, "TYPE_SNAPSHOT", INT2NUM(ZFS_TYPE_SNAPSHOT));
+  rb_define_const(cZfsConsts, "TYPE_VOLUME", INT2NUM(ZFS_TYPE_VOLUME));
+  rb_define_const(cZfsConsts, "TYPE_POOL", INT2NUM(ZFS_TYPE_POOL));
+  rb_define_const(cZfsConsts, "TYPE_ANY", INT2NUM(ZFS_TYPE_ANY));
+
+  // Error codes
+  rb_define_const(mErrors, "NOMEM", INT2NUM(EZFS_NOMEM));
+  rb_define_const(mErrors, "BADPROP", INT2NUM(EZFS_BADPROP));
+  rb_define_const(mErrors, "PROPREADONLY", INT2NUM(EZFS_PROPREADONLY));
+  rb_define_const(mErrors, "PROPTYPE", INT2NUM(EZFS_PROPTYPE));
+  rb_define_const(mErrors, "PROPNONINHERIT", INT2NUM(EZFS_PROPNONINHERIT));
+  rb_define_const(mErrors, "PROPSPACE", INT2NUM(EZFS_PROPSPACE));
+  rb_define_const(mErrors, "BADTYPE", INT2NUM(EZFS_BADTYPE));
+  rb_define_const(mErrors, "BUSY", INT2NUM(EZFS_BUSY));
+  rb_define_const(mErrors, "EXISTS", INT2NUM(EZFS_EXISTS));
+  rb_define_const(mErrors, "NOENT", INT2NUM(EZFS_NOENT));
+  rb_define_const(mErrors, "BADSTREAM", INT2NUM(EZFS_BADSTREAM));
+  rb_define_const(mErrors, "DSREADONLY", INT2NUM(EZFS_DSREADONLY));
+  rb_define_const(mErrors, "VOLTOOBIG", INT2NUM(EZFS_VOLTOOBIG));
+  rb_define_const(mErrors, "VOLHASDATA", INT2NUM(EZFS_VOLHASDATA));
+  rb_define_const(mErrors, "INVALIDNAME", INT2NUM(EZFS_INVALIDNAME));
+  rb_define_const(mErrors, "BADRESTORE", INT2NUM(EZFS_BADRESTORE));
+  rb_define_const(mErrors, "BADBACKUP", INT2NUM(EZFS_BADBACKUP));
+  rb_define_const(mErrors, "BADTARGET", INT2NUM(EZFS_BADTARGET));
+  rb_define_const(mErrors, "NODEVICE", INT2NUM(EZFS_NODEVICE));
+  rb_define_const(mErrors, "BADDEV", INT2NUM(EZFS_BADDEV));
+  rb_define_const(mErrors, "NOREPLICAS", INT2NUM(EZFS_NOREPLICAS));
+  rb_define_const(mErrors, "RESILVERING", INT2NUM(EZFS_RESILVERING));
+  rb_define_const(mErrors, "BADVERSION", INT2NUM(EZFS_BADVERSION));
+  rb_define_const(mErrors, "POOLUNAVAIL", INT2NUM(EZFS_POOLUNAVAIL));
+  rb_define_const(mErrors, "DEVOVERFLOW", INT2NUM(EZFS_DEVOVERFLOW));
+  rb_define_const(mErrors, "BADPATH", INT2NUM(EZFS_BADPATH));
+  rb_define_const(mErrors, "CROSSTARGET", INT2NUM(EZFS_CROSSTARGET));
+  rb_define_const(mErrors, "ZONED", INT2NUM(EZFS_ZONED));
+  rb_define_const(mErrors, "MOUNTFAILED", INT2NUM(EZFS_MOUNTFAILED));
+  rb_define_const(mErrors, "UMOUNTFAILED", INT2NUM(EZFS_UMOUNTFAILED));
+  rb_define_const(mErrors, "UNSHARENFSFAILED", INT2NUM(EZFS_UNSHARENFSFAILED));
+  rb_define_const(mErrors, "SHARENFSFAILED", INT2NUM(EZFS_SHARENFSFAILED));
+  rb_define_const(mErrors, "DEVLINKS", INT2NUM(EZFS_DEVLINKS));
+  rb_define_const(mErrors, "PERM", INT2NUM(EZFS_PERM));
+  rb_define_const(mErrors, "NOSPC", INT2NUM(EZFS_NOSPC));
+  rb_define_const(mErrors, "IO", INT2NUM(EZFS_IO));
+  rb_define_const(mErrors, "INTR", INT2NUM(EZFS_INTR));
+  rb_define_const(mErrors, "ISSPARE", INT2NUM(EZFS_ISSPARE));
+  rb_define_const(mErrors, "INVALCONFIG", INT2NUM(EZFS_INVALCONFIG));
+  rb_define_const(mErrors, "RECURSIVE", INT2NUM(EZFS_RECURSIVE));
+  rb_define_const(mErrors, "NOHISTORY", INT2NUM(EZFS_NOHISTORY));
+  rb_define_const(mErrors, "UNSHAREISCSIFAILED", INT2NUM(EZFS_UNSHAREISCSIFAILED));
+  rb_define_const(mErrors, "SHAREISCSIFAILED", INT2NUM(EZFS_SHAREISCSIFAILED));
+  rb_define_const(mErrors, "POOLPROPS", INT2NUM(EZFS_POOLPROPS));
+  rb_define_const(mErrors, "POOL_NOTSUP", INT2NUM(EZFS_POOL_NOTSUP));
+  rb_define_const(mErrors, "POOL_INVALARG", INT2NUM(EZFS_POOL_INVALARG));
+  rb_define_const(mErrors, "NAMETOOLONG", INT2NUM(EZFS_NAMETOOLONG));
+  rb_define_const(mErrors, "UNKNOWN", INT2NUM(EZFS_UNKNOWN));
 }
 
 void Init_libzfs()
@@ -238,9 +291,8 @@ void Init_libzfs()
   VALUE cLibZfs = rb_define_class("LibZfs", rb_cObject);
   VALUE cZpool = rb_define_class("Zpool", rb_cObject);
   VALUE cZFS = rb_define_class("ZFS", rb_cObject);
-  VALUE cZfsConsts = rb_define_module("ZfsConsts");
 
-  Init_libzfs_consts(cZfsConsts);
+  Init_libzfs_consts();
   
   rb_define_alloc_func(cLibZfs, my_libzfs_alloc);
   rb_define_method(cLibZfs, "errno", my_libzfs_errno, 0);

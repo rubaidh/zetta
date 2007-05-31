@@ -101,6 +101,57 @@ describe "All the constants in libzfs.h" do
     ZfsConsts::TYPE_POOL.should       == 8
     ZfsConsts::TYPE_ANY.should == ZfsConsts::TYPE_FILESYSTEM | ZfsConsts::TYPE_SNAPSHOT | ZfsConsts::TYPE_VOLUME
   end
+  
+  it "should make the error types available" do
+    ZfsConsts::Errors::NOMEM.should               == 2000
+    ZfsConsts::Errors::BADPROP.should             == 2001
+    ZfsConsts::Errors::PROPREADONLY.should        == 2002
+    ZfsConsts::Errors::PROPTYPE.should            == 2003
+    ZfsConsts::Errors::PROPNONINHERIT.should      == 2004
+    ZfsConsts::Errors::PROPSPACE.should           == 2005
+    ZfsConsts::Errors::BADTYPE.should             == 2006
+    ZfsConsts::Errors::BUSY.should                == 2007
+    ZfsConsts::Errors::EXISTS.should              == 2008
+    ZfsConsts::Errors::NOENT.should               == 2009
+    ZfsConsts::Errors::BADSTREAM.should           == 2010
+    ZfsConsts::Errors::DSREADONLY.should          == 2011
+    ZfsConsts::Errors::VOLTOOBIG.should           == 2012
+    ZfsConsts::Errors::VOLHASDATA.should          == 2013
+    ZfsConsts::Errors::INVALIDNAME.should         == 2014
+    ZfsConsts::Errors::BADRESTORE.should          == 2015
+    ZfsConsts::Errors::BADBACKUP.should           == 2016
+    ZfsConsts::Errors::BADTARGET.should           == 2017
+    ZfsConsts::Errors::NODEVICE.should            == 2018
+    ZfsConsts::Errors::BADDEV.should              == 2019
+    ZfsConsts::Errors::NOREPLICAS.should          == 2020
+    ZfsConsts::Errors::RESILVERING.should         == 2021
+    ZfsConsts::Errors::BADVERSION.should          == 2022
+    ZfsConsts::Errors::POOLUNAVAIL.should         == 2023
+    ZfsConsts::Errors::DEVOVERFLOW.should         == 2024
+    ZfsConsts::Errors::BADPATH.should             == 2025
+    ZfsConsts::Errors::CROSSTARGET.should         == 2026
+    ZfsConsts::Errors::ZONED.should               == 2027
+    ZfsConsts::Errors::MOUNTFAILED.should         == 2028
+    ZfsConsts::Errors::UMOUNTFAILED.should        == 2029
+    ZfsConsts::Errors::UNSHARENFSFAILED.should    == 2030
+    ZfsConsts::Errors::SHARENFSFAILED.should      == 2031
+    ZfsConsts::Errors::DEVLINKS.should            == 2032
+    ZfsConsts::Errors::PERM.should                == 2033
+    ZfsConsts::Errors::NOSPC.should               == 2034
+    ZfsConsts::Errors::IO.should                  == 2035
+    ZfsConsts::Errors::INTR.should                == 2036
+    ZfsConsts::Errors::ISSPARE.should             == 2037
+    ZfsConsts::Errors::INVALCONFIG.should         == 2038
+    ZfsConsts::Errors::RECURSIVE.should           == 2039
+    ZfsConsts::Errors::NOHISTORY.should           == 2040
+    ZfsConsts::Errors::UNSHAREISCSIFAILED.should  == 2041
+    ZfsConsts::Errors::SHAREISCSIFAILED.should    == 2042
+    ZfsConsts::Errors::POOLPROPS.should           == 2043
+    ZfsConsts::Errors::POOL_NOTSUP.should         == 2044
+    ZfsConsts::Errors::POOL_INVALARG.should       == 2045
+    ZfsConsts::Errors::NAMETOOLONG.should         == 2046
+    ZfsConsts::Errors::UNKNOWN.should             == 2047
+  end
 end
 
 describe "Given a ZFS filesystem called 'pool/mathie'" do
