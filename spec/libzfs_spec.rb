@@ -176,7 +176,7 @@ context "Given a non-existant filesystem 'pool/nonexistent'" do
   it "Until I fix it, we can create the object, but @z notes the error." do
     fs = ZFS.new('pool/nonexistent', @z, ZfsConsts::TYPE_ANY)
     fs.should_not be_nil
-    @z.errno.should == 2009 # FIXME: Magic numbers!
+    @z.errno.should == ZfsConsts::Errors::NOENT
     @z.error_action.should == "cannot open 'pool/nonexistent'"
     @z.error_description.should == "dataset does not exist"
   end
