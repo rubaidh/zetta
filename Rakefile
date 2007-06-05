@@ -11,7 +11,10 @@ task :default => [ :compile, :spec ]
 
 MAJOR_VERSION = "0.1"
 
-CLEAN.include ["ext/**/*.bundle", "lib/*.bundle", "ext/**/{Makefile,mkmf.log,*.o}", "*.gem", 'pkg']
+CLEAN.include [
+  "ext/**/*.bundle", "lib/*.bundle", "ext/**/{Makefile,mkmf.log,*.o}",
+  "*.gem", 'pkg', 'doc/coverage', 'doc/rdoc'
+]
 
 Gem::manage_gems
 SPEC = Gem::Specification.new do |s|
