@@ -95,11 +95,11 @@ end
 
 describe "All the constants in libzfs.h" do
   it "should make the filesystem types available" do
-    ZfsConsts::Types::FILESYSTEM.should == 1
-    ZfsConsts::Types::SNAPSHOT.should   == 2
-    ZfsConsts::Types::VOLUME.should     == 4
-    ZfsConsts::Types::POOL.should       == 8
-    ZfsConsts::Types::ANY.should == ZfsConsts::Types::FILESYSTEM | ZfsConsts::Types::SNAPSHOT | ZfsConsts::Types::VOLUME
+    ZfsConsts::TYPE_FILESYSTEM.should == 1
+    ZfsConsts::TYPE_SNAPSHOT.should   == 2
+    ZfsConsts::TYPE_VOLUME.should     == 4
+    ZfsConsts::TYPE_POOL.should       == 8
+    ZfsConsts::TYPE_ANY.should == ZfsConsts::TYPE_FILESYSTEM | ZfsConsts::TYPE_SNAPSHOT | ZfsConsts::TYPE_VOLUME
   end
   
   it "should make the error types available" do
@@ -152,53 +152,19 @@ describe "All the constants in libzfs.h" do
     ZfsConsts::Errors::NAMETOOLONG.should         == 2046
     ZfsConsts::Errors::UNKNOWN.should             == 2047
   end
-  
-  it "should make the pool health status code available" do
-    ZfsConsts::HealthStatus::CORRUPT_CACHE.should     == 0
-    ZfsConsts::HealthStatus::MISSING_DEV_R.should     == 1
-    ZfsConsts::HealthStatus::MISSING_DEV_NR.should    == 2
-    ZfsConsts::HealthStatus::CORRUPT_LABEL_R.should   == 3
-    ZfsConsts::HealthStatus::CORRUPT_LABEL_NR.should  == 4
-    ZfsConsts::HealthStatus::BAD_GUID_SUM.should      == 5
-    ZfsConsts::HealthStatus::CORRUPT_POOL.should      == 6
-    ZfsConsts::HealthStatus::CORRUPT_DATA.should      == 7
-    ZfsConsts::HealthStatus::FAILING_DEV.should       == 8
-    ZfsConsts::HealthStatus::VERSION_NEWER.should     == 9
-    ZfsConsts::HealthStatus::HOSTID_MISMATCH.should   == 10
-    ZfsConsts::HealthStatus::VERSION_OLDER.should     == 11
-    ZfsConsts::HealthStatus::RESILVERING.should       == 12
-    ZfsConsts::HealthStatus::OFFLINE_DEV.should       == 13
-    ZfsConsts::HealthStatus::OK.should                == 14
-  end
 end
 
 describe "Given a ZFS filesystem called 'pool/mathie'" do
   before do
     @z = LibZfs.new
-    @fs = ZFS.new('pool/mathie', @z, ZfsConsts::Types::ANY)
   end
 
   it "we can open up the filesystem" do
-    @fs.should_not be_nil
+    fs = ZFS.new('pool/mathie', @z, ZfsConsts::TYPE_ANY)
+    fs.should_not be_nil
     @z.errno.should == 0
     @z.error_action.should == ""
     @z.error_description.should == "no error"
-  end
-
-end
-
-describe "Given an existing ZFS filesystem called 'pool/unshared" do
-  before do
-    @z = LibZfs.new
-    @fs = ZFS.new('pool/unshared', @z, ZfsConsts::Types::ANY)
-  end
-
-  it "should be shareable and unshareable" do
-    @fs.is_shared?.should == false
-    lambda { @fs.share! }.should_not raise_error
-    @fs.is_shared?.should == true
-    lambda { @fs.unshare! }.should_not raise_error
-    @fs.is_shared?.should == false
   end
 end
 
@@ -208,7 +174,7 @@ context "Given a non-existant filesystem 'pool/nonexistent'" do
   end
   
   it "Until I fix it, we can create the object, but @z notes the error." do
-    fs = ZFS.new('pool/nonexistent', @z, ZfsConsts::Types::ANY)
+    fs = ZFS.new('pool/nonexistent', @z, ZfsConsts::TYPE_ANY)
     fs.should_not be_nil
     @z.errno.should == ZfsConsts::Errors::NOENT
     @z.error_action.should == "cannot open 'pool/nonexistent'"
