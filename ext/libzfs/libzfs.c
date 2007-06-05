@@ -182,6 +182,13 @@ static VALUE my_zfs_new(int argc, VALUE *argv, VALUE klass)
   return Data_Wrap_Struct(klass, 0, zfs_close, zfs_handle);
 }
 
+static VALUE my_zfs_is_shared(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return zfs_is_shared(zfs_handle) ? Qtrue : Qfalse;
+}
 /*
  * The low-level libzfs handle widget.
  */
@@ -227,13 +234,15 @@ static void Init_libzfs_consts()
 {
   VALUE cZfsConsts = rb_define_module("ZfsConsts");
   VALUE mErrors = rb_define_module_under(cZfsConsts, "Errors");
+  VALUE mTypes = rb_define_module_under(cZfsConsts, "Types");
+  VALUE mHealthStatus = rb_define_module_under(cZfsConsts, "HealthStatus");
 
   // Filesystem types
-  rb_define_const(cZfsConsts, "TYPE_FILESYSTEM", INT2NUM(ZFS_TYPE_FILESYSTEM));
-  rb_define_const(cZfsConsts, "TYPE_SNAPSHOT", INT2NUM(ZFS_TYPE_SNAPSHOT));
-  rb_define_const(cZfsConsts, "TYPE_VOLUME", INT2NUM(ZFS_TYPE_VOLUME));
-  rb_define_const(cZfsConsts, "TYPE_POOL", INT2NUM(ZFS_TYPE_POOL));
-  rb_define_const(cZfsConsts, "TYPE_ANY", INT2NUM(ZFS_TYPE_ANY));
+  rb_define_const(mTypes, "FILESYSTEM", INT2NUM(ZFS_TYPE_FILESYSTEM));
+  rb_define_const(mTypes, "SNAPSHOT", INT2NUM(ZFS_TYPE_SNAPSHOT));
+  rb_define_const(mTypes, "VOLUME", INT2NUM(ZFS_TYPE_VOLUME));
+  rb_define_const(mTypes, "POOL", INT2NUM(ZFS_TYPE_POOL));
+  rb_define_const(mTypes, "ANY", INT2NUM(ZFS_TYPE_ANY));
 
   // Error codes
   rb_define_const(mErrors, "NOMEM", INT2NUM(EZFS_NOMEM));
@@ -284,6 +293,23 @@ static void Init_libzfs_consts()
   rb_define_const(mErrors, "POOL_INVALARG", INT2NUM(EZFS_POOL_INVALARG));
   rb_define_const(mErrors, "NAMETOOLONG", INT2NUM(EZFS_NAMETOOLONG));
   rb_define_const(mErrors, "UNKNOWN", INT2NUM(EZFS_UNKNOWN));
+  
+  /* Pool health status codes. */
+  rb_define_const(mHealthStatus, "CORRUPT_CACHE", INT2NUM(ZPOOL_STATUS_CORRUPT_CACHE));
+  rb_define_const(mHealthStatus, "MISSING_DEV_R", INT2NUM(ZPOOL_STATUS_MISSING_DEV_R));
+  rb_define_const(mHealthStatus, "MISSING_DEV_NR", INT2NUM(ZPOOL_STATUS_MISSING_DEV_NR));
+  rb_define_const(mHealthStatus, "CORRUPT_LABEL_R", INT2NUM(ZPOOL_STATUS_CORRUPT_LABEL_R));
+  rb_define_const(mHealthStatus, "CORRUPT_LABEL_NR", INT2NUM(ZPOOL_STATUS_CORRUPT_LABEL_NR));
+  rb_define_const(mHealthStatus, "BAD_GUID_SUM", INT2NUM(ZPOOL_STATUS_BAD_GUID_SUM));
+  rb_define_const(mHealthStatus, "CORRUPT_POOL", INT2NUM(ZPOOL_STATUS_CORRUPT_POOL));
+  rb_define_const(mHealthStatus, "CORRUPT_DATA", INT2NUM(ZPOOL_STATUS_CORRUPT_DATA));
+  rb_define_const(mHealthStatus, "FAILING_DEV", INT2NUM(ZPOOL_STATUS_FAILING_DEV));
+  rb_define_const(mHealthStatus, "VERSION_NEWER", INT2NUM(ZPOOL_STATUS_VERSION_NEWER));
+  rb_define_const(mHealthStatus, "HOSTID_MISMATCH", INT2NUM(ZPOOL_STATUS_HOSTID_MISMATCH));
+  rb_define_const(mHealthStatus, "VERSION_OLDER", INT2NUM(ZPOOL_STATUS_VERSION_OLDER));
+  rb_define_const(mHealthStatus, "RESILVERING", INT2NUM(ZPOOL_STATUS_RESILVERING));
+  rb_define_const(mHealthStatus, "OFFLINE_DEV", INT2NUM(ZPOOL_STATUS_OFFLINE_DEV));
+  rb_define_const(mHealthStatus, "OK", INT2NUM(ZPOOL_STATUS_OK));
 }
 
 void Init_libzfs()
@@ -315,5 +341,5 @@ void Init_libzfs()
   
   rb_define_singleton_method(cZFS, "new", my_zfs_new, -1);
   rb_define_method(cZFS, "libzfs_handle", my_zfs_get_handle, 0);
-  
+  rb_define_method(cZFS, "is_shared?", my_zfs_is_shared, 0);
 }
