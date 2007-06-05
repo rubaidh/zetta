@@ -253,6 +253,11 @@ static void Init_libzfs_consts()
   VALUE mErrors = rb_define_module_under(cZfsConsts, "Errors");
   VALUE mTypes = rb_define_module_under(cZfsConsts, "Types");
   VALUE mHealthStatus = rb_define_module_under(cZfsConsts, "HealthStatus");
+  VALUE mState = rb_define_module_under(cZfsConsts, "State");
+  VALUE mPoolState = rb_define_module_under(mState, "Pool");
+
+  // Current version
+  rb_define_const(cZfsConsts, "VERSION", INT2NUM(ZFS_VERSION));
 
   // Filesystem types
   rb_define_const(mTypes, "FILESYSTEM", INT2NUM(ZFS_TYPE_FILESYSTEM));
@@ -327,6 +332,15 @@ static void Init_libzfs_consts()
   rb_define_const(mHealthStatus, "RESILVERING", INT2NUM(ZPOOL_STATUS_RESILVERING));
   rb_define_const(mHealthStatus, "OFFLINE_DEV", INT2NUM(ZPOOL_STATUS_OFFLINE_DEV));
   rb_define_const(mHealthStatus, "OK", INT2NUM(ZPOOL_STATUS_OK));
+  
+  /* Pool state codes */
+  rb_define_const(mPoolState, "ACTIVE", INT2NUM(POOL_STATE_ACTIVE));
+  rb_define_const(mPoolState, "EXPORTED", INT2NUM(POOL_STATE_EXPORTED));
+  rb_define_const(mPoolState, "DESTROYED", INT2NUM(POOL_STATE_DESTROYED));
+  rb_define_const(mPoolState, "SPARE", INT2NUM(POOL_STATE_SPARE));
+  rb_define_const(mPoolState, "UNINITIALIZED", INT2NUM(POOL_STATE_UNINITIALIZED));
+  rb_define_const(mPoolState, "UNAVAIL", INT2NUM(POOL_STATE_UNAVAIL));
+  rb_define_const(mPoolState, "POTENTIALLY_ACTIVE", INT2NUM(POOL_STATE_POTENTIALLY_ACTIVE));
 }
 
 void Init_libzfs()

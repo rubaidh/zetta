@@ -37,11 +37,12 @@ describe Zpool, "given a precreated pool on the filesystem called 'pool'" do
   
   before do
     @z = LibZfs.new
+    @pool_name = 'pool'
+    @pool = Zpool.new(@pool_name, @z)
   end
 
   it "can successfully open the pool" do
-    pool = Zpool.new('pool', @z)
-    pool.should_not be_nil
+    @pool.should_not be_nil
     @z.errno.should == 0
     @z.error_action.should. == ""
     @z.error_description.should == "no error"
@@ -52,27 +53,16 @@ describe Zpool, "given a precreated pool on the filesystem called 'pool'" do
   # that bit right!
   it "can't be opened if we don't supply the right arguments" do
     lambda do
-      pool = Zpool.new('pool')
+      too_few_arguments_to_pool = Zpool.new(@pool_name)
     end.should raise_error(ArgumentError)
 
     lambda do
-      pool = Zpool.new('pool', @z, :another_arg)
+      too_many_arguments_to_pool = Zpool.new(@pool_name, @z, :another_arg)
     end.should raise_error(ArgumentError)
   end
   
-  it "will, believe it or not, give you a handle back to a non-existent pool" do
-    pool = Zpool.new('nonexistentpool', @z)
-    pool.should_not be_nil
-    
-    # But you'll get an error
-    @z.errno.should_not == 0
-    @z.error_action.should == "cannot open 'nonexistentpool'"
-    @z.error_description.should == "no such pool"
-  end
-  
   it "should be able to retrieve the libzfs handle" do
-    pool = Zpool.new('pool', @z)
-    h = pool.libzfs_handle
+    h = @pool.libzfs_handle
     h.should_not be_nil
     h.errno.should == 0
     h.error_action.should == ""
@@ -91,6 +81,53 @@ describe Zpool, "given a precreated pool on the filesystem called 'pool'" do
   #   @z.error_action.should == ""
   #   @z.error_description.should == "no error"
   # end
+  
+  it "should allow us to retrieve the name of the pool" do
+    @pool.name.should == @pool_name
+  end
+
+  it "should allow us to retrieve the guid" do
+    # Unfortunately, in order to make it portable, there's not much more
+    # we can say about it!
+    @pool.guid.should > 0
+  end
+  
+  it "should allow us to query space information on the pool" do
+    # I think these are all invariant.
+    @pool.space_total.should > 0
+    @pool.space_used.should > 0
+    @pool.space_total.should > @pool.space_used
+  end
+  
+  it "should allow us to query the altroot, which will be nil" do
+    @pool.root.should == nil
+  end
+  
+  it "should give us the current pool status, which will be ACTIVE" do
+    @pool.state.should == ZfsConsts::State::Pool::ACTIVE
+  end
+  
+  it "should have the version of the pool, which should be something sane" do
+    @pool.version.should > 0
+    @pool.version.should <= ZfsConsts::VERSION
+  end
+end
+
+describe "trying to access a non-existant pool" do
+  before do
+    @z = LibZfs.new
+  end
+
+  it "will, believe it or not, give you a handle back but with an error set" do
+    pool = Zpool.new('nonexistentpool', @z)
+    pool.should_not be_nil
+    
+    # But you'll get an error
+    @z.errno.should == ZfsConsts::Errors::NOENT
+    @z.error_action.should == "cannot open 'nonexistentpool'"
+    @z.error_description.should == "no such pool"
+  end
+  
 end
 
 describe "All the constants in libzfs.h" do
@@ -169,6 +206,16 @@ describe "All the constants in libzfs.h" do
     ZfsConsts::HealthStatus::RESILVERING.should       == 12
     ZfsConsts::HealthStatus::OFFLINE_DEV.should       == 13
     ZfsConsts::HealthStatus::OK.should                == 14
+  end
+  
+  it "should make the pool states available" do
+    ZfsConsts::State::Pool::ACTIVE.should == 0
+    ZfsConsts::State::Pool::EXPORTED.should == 1
+    ZfsConsts::State::Pool::DESTROYED.should == 2
+    ZfsConsts::State::Pool::SPARE.should == 3
+    ZfsConsts::State::Pool::UNINITIALIZED.should == 4
+    ZfsConsts::State::Pool::UNAVAIL.should == 5
+    ZfsConsts::State::Pool::POTENTIALLY_ACTIVE.should == 6
   end
 end
 
