@@ -219,11 +219,24 @@ describe "All the constants in libzfs.h" do
   end
 end
 
+describe "an existant filesystem", :shared => true do
+  it "should have the correct name" do
+    @fs.name.should == @fs_name
+  end
+  
+  it "should be a filesystem" do
+    @fs.fs_type.should == ZfsConsts::Types::FILESYSTEM
+  end
+end
+
 describe "Given a ZFS filesystem called 'pool/mathie'" do
   before do
     @z = LibZfs.new
-    @fs = ZFS.new('pool/mathie', @z, ZfsConsts::Types::ANY)
+    @fs_name = 'pool/mathie'
+    @fs = ZFS.new(@fs_name, @z, ZfsConsts::Types::ANY)
   end
+
+  it_should_behave_like "an existant filesystem"
 
   it "we can open up the filesystem" do
     @fs.should_not be_nil
@@ -237,8 +250,11 @@ end
 describe "Given an existing ZFS filesystem called 'pool/shared' which has the sharenfs property set to true" do
   before do
     @z = LibZfs.new
-    @fs = ZFS.new('pool/shared', @z, ZfsConsts::Types::ANY)
+    @fs_name = 'pool/shared'
+    @fs = ZFS.new(@fs_name, @z, ZfsConsts::Types::ANY)
   end
+
+  it_should_behave_like "an existant filesystem"
 
   it "should be shareable and unshareable" do
     @fs.is_shared?.should == true
@@ -252,8 +268,11 @@ end
 describe "Given an existing ZFS filesystem called 'pool/unshared'" do
   before do
     @z = LibZfs.new
-    @fs = ZFS.new('pool/unshared', @z, ZfsConsts::Types::ANY)
+    @fs_name = 'pool/unshared'
+    @fs = ZFS.new(@fs_name, @z, ZfsConsts::Types::ANY)
   end
+
+  it_should_behave_like "an existant filesystem"
 
   it "should ignore any attempts to share and unshare it because sharenfs is off" do
     @fs.is_shared?.should == false
@@ -263,6 +282,7 @@ describe "Given an existing ZFS filesystem called 'pool/unshared'" do
     @fs.is_shared?.should == false
   end
 end
+
 describe "Given a non-existant filesystem 'pool/nonexistent'" do
   before do
     @z = LibZfs.new
