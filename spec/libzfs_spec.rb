@@ -220,6 +220,13 @@ describe "All the constants in libzfs.h" do
 end
 
 describe "an existant filesystem", :shared => true do
+  it "should have successfully opened up the filesystem" do
+    @fs.should_not be_nil
+    @z.errno.should == 0
+    @z.error_action.should == ""
+    @z.error_description.should == "no error"
+  end
+
   it "should have the correct name" do
     @fs.name.should == @fs_name
   end
@@ -227,24 +234,23 @@ describe "an existant filesystem", :shared => true do
   it "should be a filesystem" do
     @fs.fs_type.should == ZfsConsts::Types::FILESYSTEM
   end
-end
 
-describe "Given a ZFS filesystem called 'pool/mathie'" do
-  before do
-    @z = LibZfs.new
-    @fs_name = 'pool/mathie'
+  it "should be allowed to rename to itself without an error" do
+    @fs.rename(@fs_name, false).should == 0
+    @fs.name.should == @fs_name
+  end
+
+  it "should be renameable (and back again so we don't break things!)" do
+    new_name = "pool/new_filesystem_name_#{rand(1000)}" # Just in case...
+    @fs.rename(new_name, false).should == 0
+    @fs = ZFS.new(new_name, @z, ZfsConsts::Types::ANY)
+    @fs.name.should == new_name
+    
+    # And rename it back so the rest of the tests still work.
+    @fs.rename(@fs_name, false).should == 0
     @fs = ZFS.new(@fs_name, @z, ZfsConsts::Types::ANY)
+    @fs.name.should == @fs_name
   end
-
-  it_should_behave_like "an existant filesystem"
-
-  it "we can open up the filesystem" do
-    @fs.should_not be_nil
-    @z.errno.should == 0
-    @z.error_action.should == ""
-    @z.error_description.should == "no error"
-  end
-
 end
 
 describe "Given an existing ZFS filesystem called 'pool/shared' which has the sharenfs property set to true" do
@@ -286,11 +292,11 @@ end
 describe "Given a non-existant filesystem 'pool/nonexistent'" do
   before do
     @z = LibZfs.new
+    @fs = ZFS.new('pool/nonexistent', @z, ZfsConsts::Types::ANY)
   end
   
   it "Until I fix it, we can create the object, but @z notes the error." do
-    fs = ZFS.new('pool/nonexistent', @z, ZfsConsts::Types::ANY)
-    fs.should_not be_nil
+    @fs.should_not be_nil
     @z.errno.should == ZfsConsts::Errors::NOENT
     @z.error_action.should == "cannot open 'pool/nonexistent'"
     @z.error_description.should == "dataset does not exist"

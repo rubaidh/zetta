@@ -185,9 +185,13 @@ static VALUE my_zfs_new(int argc, VALUE *argv, VALUE klass)
 static VALUE my_zfs_get_name(VALUE self)
 {
   zfs_handle_t *zfs_handle;
+  const char *name = NULL;
   Data_Get_Struct(self, zfs_handle_t, zfs_handle);
-  
-  return rb_str_new2(zfs_get_name(zfs_handle));
+  name = zfs_get_name(zfs_handle);
+  if(name) {
+    return rb_str_new2(name);
+  }
+  return Qnil;
 }
 
 static VALUE my_zfs_get_type(VALUE self)
@@ -196,6 +200,14 @@ static VALUE my_zfs_get_type(VALUE self)
   Data_Get_Struct(self, zfs_handle_t, zfs_handle);
   
   return INT2NUM(zfs_get_type(zfs_handle));
+}
+
+static VALUE my_zfs_rename(VALUE self, VALUE target, VALUE recursive)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return INT2NUM(zfs_rename(zfs_handle, StringValuePtr(target), RTEST(recursive)));
 }
 
 static VALUE my_zfs_is_shared(VALUE self)
@@ -390,6 +402,7 @@ void Init_libzfs()
   rb_define_method(cZFS, "libzfs_handle", my_zfs_get_handle, 0);
   rb_define_method(cZFS, "name", my_zfs_get_name, 0);
   rb_define_method(cZFS, "fs_type", my_zfs_get_type, 0);
+  rb_define_method(cZFS, "rename", my_zfs_rename, 2);
   rb_define_method(cZFS, "is_shared?", my_zfs_is_shared, 0);
   rb_define_method(cZFS, "share!", my_zfs_share, 0);
   rb_define_method(cZFS, "unshare!", my_zfs_unshare, 0);
