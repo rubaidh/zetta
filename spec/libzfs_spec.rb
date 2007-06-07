@@ -286,11 +286,11 @@ describe "Given an existing ZFS filesystem called 'pool/shared' which has the sh
   it_should_behave_like "a shareable target"
 
   it "should be shareable and unshareable with the NFS-specific share functions" do
-    @fs.is_shared_nfs?.should == true
+    @fs.nfs_share_name.should == "/#{@fs_name}"
     lambda { @fs.unshare_nfs!.should == 0 }.should_not raise_error
-    @fs.is_shared_nfs?.should == false
+    @fs.nfs_share_name.should == nil
     lambda { @fs.share_nfs!.should == 0 }.should_not raise_error
-    @fs.is_shared_nfs?.should == true
+    @fs.nfs_share_name.should == "/#{@fs_name}"
   end
 end
 
@@ -329,11 +329,11 @@ describe "Given an existing ZFS filesystem called 'pool/unshared'" do
     lambda { @fs.share!.should == 0 }.should_not raise_error
     @fs.is_shared?.should == false
 
-    @fs.is_shared_nfs?.should == false
+    @fs.nfs_share_name.should == nil
     lambda { @fs.unshare_nfs!.should == 0 }.should_not raise_error
-    @fs.is_shared_nfs?.should == false
+    @fs.nfs_share_name.should == nil
     lambda { @fs.share_nfs!.should == 0 }.should_not raise_error
-    @fs.is_shared_nfs?.should == false
+    @fs.nfs_share_name.should == nil
   end
 end
 

@@ -234,12 +234,13 @@ static VALUE my_zfs_unshare(VALUE self)
   return INT2NUM(zfs_unshare(zfs_handle));
 }
 
-static VALUE my_zfs_is_shared_nfs(VALUE self)
+static VALUE my_zfs_nfs_share_name(VALUE self)
 {
   zfs_handle_t *zfs_handle;
+  char *path;
   Data_Get_Struct(self, zfs_handle_t, zfs_handle);
   
-  return zfs_is_shared_nfs(zfs_handle, NULL) ? Qtrue : Qfalse;
+  return zfs_is_shared_nfs(zfs_handle, &path) ? rb_str_new2(path) : Qnil;
 }
 
 static VALUE my_zfs_share_nfs(VALUE self)
@@ -462,7 +463,7 @@ void Init_libzfs()
   rb_define_method(cZFS, "is_shared?", my_zfs_is_shared, 0);
   rb_define_method(cZFS, "share!", my_zfs_share, 0);
   rb_define_method(cZFS, "unshare!", my_zfs_unshare, 0);
-  rb_define_method(cZFS, "is_shared_nfs?", my_zfs_is_shared_nfs, 0);
+  rb_define_method(cZFS, "nfs_share_name", my_zfs_nfs_share_name, 0);
   rb_define_method(cZFS, "share_nfs!", my_zfs_share_nfs, 0);
   rb_define_method(cZFS, "unshare_nfs!", my_zfs_unshare_nfs, 0);
   rb_define_method(cZFS, "is_shared_iscsi?", my_zfs_is_shared_iscsi, 0);
