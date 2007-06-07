@@ -350,3 +350,23 @@ describe "Given a non-existant filesystem 'pool/nonexistent'" do
     @z.error_description.should == "dataset does not exist"
   end
 end
+
+# describe "a filesystem that wants to be destroyed" do
+#   before(:all) do
+#     @fs_name = 'pool/destroyable'
+#     `zfs create #{@fs_name}`
+#   end
+# 
+#   before(:each) do
+#     @z = LibZfs.new
+#     @fs = ZFS.new(@fs_name, @z, ZfsConsts::Types::ANY)
+#   end
+# 
+#   it_should_behave_like "an existant filesystem"
+# 
+#   it "should be destroyed!" do
+#     lambda { @fs.destroy!.should == 0 }.should_not raise_error
+#     
+#     # FIXME: We can't currently tell in Ruby code if it still exists or not.
+#   end
+# end

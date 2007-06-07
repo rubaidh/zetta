@@ -282,6 +282,14 @@ static VALUE my_zfs_unshare_iscsi(VALUE self)
   return INT2NUM(zfs_unshare_iscsi(zfs_handle));
 }
 
+static VALUE my_zfs_destroy(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return INT2NUM(zfs_destroy(zfs_handle));
+}
+
 /*
  * The low-level libzfs handle widget.
  */
@@ -460,4 +468,5 @@ void Init_libzfs()
   rb_define_method(cZFS, "is_shared_iscsi?", my_zfs_is_shared_iscsi, 0);
   rb_define_method(cZFS, "share_iscsi!", my_zfs_share_iscsi, 0);
   rb_define_method(cZFS, "unshare_iscsi!", my_zfs_unshare_iscsi, 0);
+  rb_define_method(cZFS, "destroy!", my_zfs_destroy, 0);
 }
