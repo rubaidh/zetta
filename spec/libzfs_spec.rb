@@ -219,7 +219,7 @@ describe "All the constants in libzfs.h" do
   end
 end
 
-describe "an existant filesystem", :shared => true do
+describe "an existant filesystem or volume", :shared => true do
   it "should have successfully opened up the filesystem" do
     @fs.should_not be_nil
     @z.errno.should == 0
@@ -231,10 +231,6 @@ describe "an existant filesystem", :shared => true do
     @fs.name.should == @fs_name
   end
   
-  it "should be a filesystem" do
-    @fs.fs_type.should == ZfsConsts::Types::FILESYSTEM
-  end
-
   it "should be allowed to rename to itself without an error" do
     @fs.rename(@fs_name, false).should == 0
     @fs.name.should == @fs_name
@@ -253,6 +249,32 @@ describe "an existant filesystem", :shared => true do
   end
 end
 
+describe "an existant filesystem", :shared => true do
+  it_should_behave_like "an existant filesystem or volume"
+
+  it "should be a filesystem" do
+    @fs.fs_type.should == ZfsConsts::Types::FILESYSTEM
+  end
+end
+
+describe "an existant volume", :shared => true do
+  it_should_behave_like "an existant filesystem or volume"
+
+  it "should be a volume" do
+    @fs.fs_type.should == ZfsConsts::Types::VOLUME
+  end
+end
+
+describe "a shareable target", :shared => true do
+  it "should be shareable and unshareable with the general share functions" do
+    @fs.is_shared?.should == true
+    lambda { @fs.unshare!.should == 0 }.should_not raise_error
+    @fs.is_shared?.should == false
+    lambda { @fs.share!.should == 0 }.should_not raise_error
+    @fs.is_shared?.should == true
+  end
+end
+
 describe "Given an existing ZFS filesystem called 'pool/shared' which has the sharenfs property set to true" do
   before do
     @z = LibZfs.new
@@ -261,13 +283,33 @@ describe "Given an existing ZFS filesystem called 'pool/shared' which has the sh
   end
 
   it_should_behave_like "an existant filesystem"
+  it_should_behave_like "a shareable target"
 
-  it "should be shareable and unshareable" do
-    @fs.is_shared?.should == true
-    lambda { @fs.unshare!.should == 0 }.should_not raise_error
-    @fs.is_shared?.should == false
-    lambda { @fs.share!.should == 0 }.should_not raise_error
-    @fs.is_shared?.should == true
+  it "should be shareable and unshareable with the NFS-specific share functions" do
+    @fs.is_shared_nfs?.should == true
+    lambda { @fs.unshare_nfs!.should == 0 }.should_not raise_error
+    @fs.is_shared_nfs?.should == false
+    lambda { @fs.share_nfs!.should == 0 }.should_not raise_error
+    @fs.is_shared_nfs?.should == true
+  end
+end
+
+describe "Given an existing ZFS volume called 'pool/sharediscsi' which has the shareiscsi property set to true" do
+  before do
+    @z = LibZfs.new
+    @fs_name = 'pool/sharediscsi'
+    @fs = ZFS.new(@fs_name, @z, ZfsConsts::Types::ANY)
+  end
+
+  it_should_behave_like "an existant volume"
+  it_should_behave_like "a shareable target"
+
+  it "should be shareable and unshareable with the iSCSI-specific share functions" do
+    @fs.is_shared_iscsi?.should == true
+    lambda { @fs.unshare_iscsi!.should == 0 }.should_not raise_error
+    @fs.is_shared_iscsi?.should == false
+    lambda { @fs.share_iscsi!.should == 0 }.should_not raise_error
+    @fs.is_shared_iscsi?.should == true
   end
 end
 
@@ -286,6 +328,12 @@ describe "Given an existing ZFS filesystem called 'pool/unshared'" do
     @fs.is_shared?.should == false
     lambda { @fs.share!.should == 0 }.should_not raise_error
     @fs.is_shared?.should == false
+
+    @fs.is_shared_nfs?.should == false
+    lambda { @fs.unshare_nfs!.should == 0 }.should_not raise_error
+    @fs.is_shared_nfs?.should == false
+    lambda { @fs.share_nfs!.should == 0 }.should_not raise_error
+    @fs.is_shared_nfs?.should == false
   end
 end
 

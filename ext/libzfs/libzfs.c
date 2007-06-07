@@ -234,6 +234,54 @@ static VALUE my_zfs_unshare(VALUE self)
   return INT2NUM(zfs_unshare(zfs_handle));
 }
 
+static VALUE my_zfs_is_shared_nfs(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return zfs_is_shared_nfs(zfs_handle, NULL) ? Qtrue : Qfalse;
+}
+
+static VALUE my_zfs_share_nfs(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return INT2NUM(zfs_share_nfs(zfs_handle));
+}
+
+static VALUE my_zfs_unshare_nfs(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return INT2NUM(zfs_unshare_nfs(zfs_handle, NULL));
+}
+
+static VALUE my_zfs_is_shared_iscsi(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return zfs_is_shared_iscsi(zfs_handle) ? Qtrue : Qfalse;
+}
+
+static VALUE my_zfs_share_iscsi(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return INT2NUM(zfs_share_iscsi(zfs_handle));
+}
+
+static VALUE my_zfs_unshare_iscsi(VALUE self)
+{
+  zfs_handle_t *zfs_handle;
+  Data_Get_Struct(self, zfs_handle_t, zfs_handle);
+  
+  return INT2NUM(zfs_unshare_iscsi(zfs_handle));
+}
+
 /*
  * The low-level libzfs handle widget.
  */
@@ -406,4 +454,10 @@ void Init_libzfs()
   rb_define_method(cZFS, "is_shared?", my_zfs_is_shared, 0);
   rb_define_method(cZFS, "share!", my_zfs_share, 0);
   rb_define_method(cZFS, "unshare!", my_zfs_unshare, 0);
+  rb_define_method(cZFS, "is_shared_nfs?", my_zfs_is_shared_nfs, 0);
+  rb_define_method(cZFS, "share_nfs!", my_zfs_share_nfs, 0);
+  rb_define_method(cZFS, "unshare_nfs!", my_zfs_unshare_nfs, 0);
+  rb_define_method(cZFS, "is_shared_iscsi?", my_zfs_is_shared_iscsi, 0);
+  rb_define_method(cZFS, "share_iscsi!", my_zfs_share_iscsi, 0);
+  rb_define_method(cZFS, "unshare_iscsi!", my_zfs_unshare_iscsi, 0);
 }
