@@ -209,12 +209,12 @@ describe "All the constants in libzfs.h" do
   end
   
   it "should make the pool states available" do
-    ZfsConsts::State::Pool::ACTIVE.should == 0
-    ZfsConsts::State::Pool::EXPORTED.should == 1
-    ZfsConsts::State::Pool::DESTROYED.should == 2
-    ZfsConsts::State::Pool::SPARE.should == 3
-    ZfsConsts::State::Pool::UNINITIALIZED.should == 4
-    ZfsConsts::State::Pool::UNAVAIL.should == 5
+    ZfsConsts::State::Pool::ACTIVE.should             == 0
+    ZfsConsts::State::Pool::EXPORTED.should           == 1
+    ZfsConsts::State::Pool::DESTROYED.should          == 2
+    ZfsConsts::State::Pool::SPARE.should              == 3
+    ZfsConsts::State::Pool::UNINITIALIZED.should      == 4
+    ZfsConsts::State::Pool::UNAVAIL.should            == 5
     ZfsConsts::State::Pool::POTENTIALLY_ACTIVE.should == 6
   end
 end
