@@ -4,3 +4,4 @@ ext/**/*.bundle
 ext/**/*.dll
 ext/**/*.so
 ext/**/*.o
+website/*.html
