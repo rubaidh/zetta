@@ -26,7 +26,7 @@ FIX (describe your package)
 
 (The MIT License)
 
-Copyright (c) 2008 FIX
+Copyright (c) 2008 Rubaidh Ltd.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

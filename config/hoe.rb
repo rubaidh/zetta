@@ -1,8 +1,8 @@
 require 'zetta/version'
 
-AUTHOR = 'FIXME full name'  # can also be an array of Authors
+AUTHOR = 'Graeme Mathieson'  # can also be an array of Authors
 EMAIL = "mathie@woss.name"
-DESCRIPTION = "description of gem"
+DESCRIPTION = "ZFS bindings for Ruby"
 GEM_NAME = 'zetta' # what ppl will type to install your gem
 RUBYFORGE_PROJECT = 'zetta' # The unix name for your project
 HOMEPATH = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
