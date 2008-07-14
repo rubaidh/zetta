@@ -1,3 +1,4 @@
+.autotest
 History.txt
 License.txt
 Manifest.txt
@@ -5,6 +6,9 @@ README.txt
 Rakefile
 config/hoe.rb
 config/requirements.rb
+ext/libzfs/extconf.rb
+ext/libzfs/libzfs.c
+ext/libzfs/mkmf.log
 lib/zetta.rb
 lib/zetta/version.rb
 log/debug.log
@@ -18,8 +22,11 @@ spec/spec_helper.rb
 spec/zetta_spec.rb
 tasks/deployment.rake
 tasks/environment.rake
+tasks/extconf.rake
+tasks/extconf/libzfs.rake
 tasks/rspec.rake
 tasks/website.rake
+test/test_libzfs_extn.rb
 website/index.html
 website/index.txt
 website/javascripts/rounded_corners_lite.inc.js
